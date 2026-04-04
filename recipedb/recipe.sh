@@ -92,7 +92,10 @@ VIEW_RECIPES() {
 }
 
 SEARCH_RECIPE() {
-    echo -e "\nSearch Recipe logic coming soon!"
+    echo -e "\nEnter the recipe name to search for:"
+    read SEARCH_NAME
+    SEARCH_RESULT=$($PSQL "SELECT title FROM recipes WHERE title ILIKE '%$SEARCH_NAME%'")
+    echo -e "\nSearch results for '$SEARCH_NAME':\n$SEARCH_RESULT"
     MAIN_MENU
 }
 
