@@ -86,7 +86,8 @@ ADD_RECIPE() {
 
 # Placeholder functions to prevent crashes
 VIEW_RECIPES() {
-    echo -e "\nView Recipes logic coming soon!"
+    SHOW_RECIPES=$($PSQL "SELECT title FROM recipes")
+    echo -e "\nRecipes in the database:\n$SHOW_RECIPES"
     MAIN_MENU
 }
 
