@@ -23,7 +23,7 @@ MAIN_MENU()
 ADD_RECIPE() {
     echo -e "\nEnter the recipe name:"
     read RECIPE_NAME
-    ADD_RECIPE_RESULT=$($PSQL "INSERT INTO recipes(name) VALUES('$RECIPE_NAME')");
+    ADD_RECIPE_RESULT=$($PSQL "INSERT INTO recipes(title) VALUES('$RECIPE_NAME')");
     if [[ $ADD_RECIPE_RESULT == "INSERT 0 1" ]]; then
         echo -e "\nRecipe added successfully!"
     else
@@ -31,7 +31,7 @@ ADD_RECIPE() {
     fi
     echo -e "Enter the ingredients (comma-separated):"
     read INGREDIENTS
-    RECIPE_ID=$($PSQL "SELECT recipe_id FROM recipes WHERE name='$RECIPE_NAME'");
+    RECIPE_ID=$($PSQL "SELECT recipe_id FROM recipes WHERE title='$RECIPE_NAME'");
     IFS=',' read -ra INGREDIENT_ARRAY <<< "$INGREDIENTS"
     for INGREDIENT in "${INGREDIENT_ARRAY[@]}"; do
         ADD_INGREDIENT_RESULT=$($PSQL "INSERT INTO ingredients(recipe_id, ingredient) VALUES($RECIPE_ID, '$INGREDIENT')");
