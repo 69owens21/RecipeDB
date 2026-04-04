@@ -96,7 +96,42 @@ SEARCH_RECIPE() {
     read SEARCH_NAME
     SEARCH_RESULT=$($PSQL "SELECT title FROM recipes WHERE title ILIKE '%$SEARCH_NAME%'")
     echo -e "\nSearch results for '$SEARCH_NAME':\n$SEARCH_RESULT"
-    MAIN_MENU
+    SEARCH_RECIPE_MENU() {
+        echo -e "\nWhat would you like to do next?"
+        echo -e "1) View recipe details"
+        echo -e "2) Return to main menu"
+        read SEARCH_MENU_SELECTION
+
+        case $SEARCH_MENU_SELECTION in
+            1) VIEW_RECIPE_DETAILS ;;
+            2) MAIN_MENU ;;
+            *) echo -e "\nInvalid option. Please try again." ; SEARCH_RECIPE_MENU ;;
+        esac
+
+        VIEW_RECIPE_DETAILS() {
+            echo -e "\nEnter the exact recipe name to view details:"
+            read DETAIL_NAME
+            RECIPE_ID=$($PSQL "SELECT recipe_id FROM recipes WHERE title='$DETAIL_NAME'" | xargs)
+            
+            if [[ -z $RECIPE_ID ]]; then
+                echo -e "\nRecipe not found. Returning to search menu."
+                SEARCH_RECIPE_MENU
+                return
+            fi
+            
+            RECIPE_INGREDIENTS=$($PSQL "SELECT i.name FROM ingredients i JOIN recipe_ingredients ri ON i.ingredient_id = ri.ingredient_id WHERE ri.recipe_id = $RECIPE_ID")
+            RECIPE_STEPS=$($PSQL "SELECT step_number, instruction FROM recipe_steps WHERE recipe_id = $RECIPE_ID ORDER BY step_number")
+            
+            echo -e "\nIngredients for '$DETAIL_NAME':\n$RECIPE_INGREDIENTS"
+            echo -e "\nSteps for '$DETAIL_NAME':\n$RECIPE_STEPS"
+            
+            # After showing details, return to search menu
+            SEARCH_RECIPE_MENU
+        }
+
+
+
+    }
 }
 
 # Execute the program
