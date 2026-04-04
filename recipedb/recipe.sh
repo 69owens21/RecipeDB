@@ -61,3 +61,5 @@ for i in "${!STEPS_ARRAY[@]}"; do
         echo -e "\nFailed to add step $STEP_NUMBER ('$STEP'). Please try again."
     fi
 done
+}
+MAIN_MENU
