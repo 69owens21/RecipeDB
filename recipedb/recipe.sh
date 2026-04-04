@@ -42,9 +42,14 @@ ADD_RECIPE() {
     
     for INGREDIENT in "${INGREDIENT_ARRAY[@]}"; do
         CLEAN_INGREDIENT=$(echo "$INGREDIENT" | xargs)
-        $PSQL "INSERT INTO ingredients(name) VALUES('$CLEAN_INGREDIENT')" > /dev/null 2>&1
-        INGREDIENT_ID=$($PSQL "SELECT ingredient_id FROM ingredients WHERE name='$CLEAN_INGREDIENT'" | xargs)
-        $PSQL "INSERT INTO recipe_ingredients(recipe_id, ingredient_id) VALUES($RECIPE_ID, $INGREDIENT_ID)") > /dev/null 2>&1
+        # Escape single quotes (for things like Tony's)
+        SAFE_INGREDIENT="${CLEAN_INGREDIENT//\'/\'\'}"
+        
+        $PSQL "INSERT INTO ingredients(name) VALUES('$SAFE_INGREDIENT')" > /dev/null 2>&1
+        INGREDIENT_ID=$($PSQL "SELECT ingredient_id FROM ingredients WHERE name='$SAFE_INGREDIENT'" | xargs)
+        
+        # FIXED: Removed the extra closing parenthesis here
+        $PSQL "INSERT INTO recipe_ingredients(recipe_id, ingredient_id) VALUES($RECIPE_ID, $INGREDIENT_ID)" > /dev/null 2>&1
     done
 
     echo -e "\nEnter the recipe steps (separated by semicolons):"
@@ -76,7 +81,6 @@ VIEW_RECIPES() {
 SEARCH_RECIPE() {
     echo -e "\nEnter the recipe name to search for:"
     read SEARCH_NAME
-    # Using ILIKE for case-insensitive searching
     SEARCH_RESULT=$($PSQL "SELECT title FROM recipes WHERE title ILIKE '%$SEARCH_NAME%'")
     
     if [[ -z $(echo "$SEARCH_RESULT" | xargs) ]]; then
@@ -115,7 +119,6 @@ VIEW_RECIPE_DETAILS() {
     
     echo -e "\n--- $DETAIL_NAME ---"
     echo -e "\nIngredients:"
-    # JOIN query to get ingredient names for this recipe
     $PSQL "SELECT i.name FROM ingredients i JOIN recipe_ingredients ri ON i.ingredient_id = ri.ingredient_id WHERE ri.recipe_id = $RECIPE_ID"
     
     echo -e "\nSteps:"
