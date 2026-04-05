@@ -124,6 +124,14 @@ VIEW_RECIPE_DETAILS() {
     echo -e "\nSteps:"
     $PSQL "SELECT step_number, instruction FROM recipe_steps WHERE recipe_id = $RECIPE_ID ORDER BY step_number"
     
+    echo -e "\nServing size:"
+    SERVING_SIZE=$($PSQL "SELECT servings FROM recipes WHERE recipe_id=$RECIPE_ID" | xargs)
+    if [[ -n $SERVING_SIZE ]]; then
+        echo "$SERVING_SIZE servings"
+    else
+        echo "Not specified"
+    fi
+
     SEARCH_RECIPE_MENU
 }
 
