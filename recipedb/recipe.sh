@@ -160,7 +160,22 @@ VIEW_RECIPE_DETAILS() {
 }
 
 CALORIE_TRACKER() {
-    echo -e "\nCalorie Tracker feature is coming soon! Stay tuned for updates."
+    echo -e "\nEnter your username:"
+    read USERNAME
+    USER_ID=$($PSQL "SELECT user_id FROM users WHERE username='$USERNAME'" | xargs)
+    
+    if [[ -z $USER_ID ]]; then
+        echo -e "\nUser not found. Would you like to create an account? (y/n)"
+        read CREATE_USER
+        if [[ $CREATE_USER == "y" ]]; then
+            $PSQL "INSERT INTO users(username) VALUES ('$USERNAME')" > /dev/null
+            USER_ID=$($PSQL "SELECT user_id FROM users WHERE username='$USERNAME'" | xargs)
+            echo "Account created for $USERNAME!"
+        else
+            MAIN_MENU; return
+        fi
+    fi
+
     MAIN_MENU
 }
 
