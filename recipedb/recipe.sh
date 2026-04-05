@@ -137,6 +137,15 @@ VIEW_RECIPE_DETAILS() {
         echo "$CALORIES calories"
     fi
 
+    echo -e "\nPrepare Time:"
+    PREP_TIME=$($PSQL "SELECT prep_time_minutes FROM recipes WHERE recipe_id=$RECIPE_ID")
+    if [[ -z $PREP_TIME || $PREP_TIME == "NULL" ]]; then
+        echo "Preparation time not specified."
+    else
+        echo "$PREP_TIME minutes"
+    fi
+
+
     SEARCH_RECIPE_MENU
 }
 
