@@ -145,6 +145,14 @@ VIEW_RECIPE_DETAILS() {
         echo "$PREP_TIME minutes"
     fi
 
+    echo -e "\nCook Time:"
+    COOK_TIME=$($PSQL "SELECT cook_time_minutes FROM recipes WHERE recipe_id=$RECIPE_ID")
+    if [[ -z $COOK_TIME || $COOK_TIME == "NULL" ]]; then
+        echo "Cook time not specified."
+    else
+        echo "$COOK_TIME minutes"
+    fi
+
 
     SEARCH_RECIPE_MENU
 }
