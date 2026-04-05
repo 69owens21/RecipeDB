@@ -42,13 +42,10 @@ ADD_RECIPE() {
     
     for INGREDIENT in "${INGREDIENT_ARRAY[@]}"; do
         CLEAN_INGREDIENT=$(echo "$INGREDIENT" | xargs)
-        # Escape single quotes (for things like Tony's)
         SAFE_INGREDIENT="${CLEAN_INGREDIENT//\'/\'\'}"
         
         $PSQL "INSERT INTO ingredients(name) VALUES('$SAFE_INGREDIENT')" > /dev/null 2>&1
         INGREDIENT_ID=$($PSQL "SELECT ingredient_id FROM ingredients WHERE name='$SAFE_INGREDIENT'" | xargs)
-        
-        # FIXED: Removed the extra closing parenthesis here
         $PSQL "INSERT INTO recipe_ingredients(recipe_id, ingredient_id) VALUES($RECIPE_ID, $INGREDIENT_ID)" > /dev/null 2>&1
     done
 
@@ -112,12 +109,13 @@ VIEW_RECIPE_DETAILS() {
     RECIPE_ID=$($PSQL "SELECT recipe_id FROM recipes WHERE title='$DETAIL_NAME'" | xargs)
     
     if [[ -z $RECIPE_ID ]]; then
-        echo -e "\nRecipe not found. Please check your spelling."
+        echo -e "\nRecipe not found. Returning to search menu."
         SEARCH_RECIPE_MENU
         return
     fi
     
     echo -e "\n--- $DETAIL_NAME ---"
+    
     echo -e "\nIngredients:"
     $PSQL "SELECT i.name FROM ingredients i JOIN recipe_ingredients ri ON i.ingredient_id = ri.ingredient_id WHERE ri.recipe_id = $RECIPE_ID"
     
@@ -125,11 +123,18 @@ VIEW_RECIPE_DETAILS() {
     $PSQL "SELECT step_number, instruction FROM recipe_steps WHERE recipe_id = $RECIPE_ID ORDER BY step_number"
     
     echo -e "\nServing size:"
-    SERVING_SIZE=$($PSQL "SELECT servings FROM recipes WHERE recipe_id=$RECIPE_ID" | xargs)
-    if [[ -n $SERVING_SIZE ]]; then
-        echo "$SERVING_SIZE servings"
+    # Using COALESCE to provide a fallback if the result is NULL
+    SERVING_SIZE=$($PSQL "SELECT COALESCE(CAST(servings AS TEXT), 'Not specified') FROM recipes WHERE recipe_id=$RECIPE_ID" | xargs)
+    echo "$SERVING_SIZE"
+
+    echo -e "\nTotal Calories:"
+    # Updated query to only select the SUM so xargs captures a single number
+    CALORIES=$($PSQL "SELECT SUM(ri.quantity * i.calories_per_base_unit) FROM recipes r JOIN recipe_ingredients ri ON r.recipe_id = ri.recipe_id JOIN ingredients i ON ri.ingredient_id = i.ingredient_id WHERE r.recipe_id = $RECIPE_ID" | xargs)
+    
+    if [[ -z $CALORIES || $CALORIES == "NULL" ]]; then
+        echo "Calorie data incomplete for this recipe."
     else
-        echo "Not specified"
+        echo "$CALORIES calories"
     fi
 
     SEARCH_RECIPE_MENU
