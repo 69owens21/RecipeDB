@@ -159,40 +159,71 @@ VIEW_RECIPE_DETAILS() {
     SEARCH_RECIPE_MENU
 }
 
+CALORIE_TRACKER_SETUP() {
+    # $1 is the USER_ID passed from the caller
+    LOCAL_USER_ID=$1
+
+    echo -e "\nEnter your weight in lbs:"
+    read WEIGHT
+    echo -e "\nEnter your age in years:"
+    read AGE
+    echo -e "\nEnter your height in inches:"
+    read HEIGHT
+    echo -e "\nEnter your gender (M/F):"
+    read GENDER
+    echo -e "Enter your activity level (1.2=Sedentary, 1.5=Moderate, 1.9=Very Active):"
+    read ACTIVITY_LEVEL
+
+    # Calculate BMR using bc
+    if [[ $GENDER == "M" ]]; then
+        BMR=$(echo "66 + (6.23 * $WEIGHT) + (12.7 * $HEIGHT) - (6.8 * $AGE)" | bc -l)
+    else
+        BMR=$(echo "655 + (4.35 * $WEIGHT) + (4.7 * $HEIGHT) - (4.7 * $AGE)" | bc -l)
+    fi
+
+    DAILY_LIMIT=$(echo "$BMR * $ACTIVITY_LEVEL" | bc -l)
+
+    # Insert into database (Note: fixed spelling to 'calorie_limits')
+    INSERT_RESULT=$($PSQL "INSERT INTO calorie_limits(user_id, weight, height, age, gender, activity_level, daily_calorie_limit) VALUES ($LOCAL_USER_ID, $WEIGHT, $HEIGHT, $AGE, '$GENDER', '$ACTIVITY_LEVEL', $DAILY_LIMIT)")
+
+    if [[ $INSERT_RESULT == "INSERT 0 1" ]]; then
+        printf "\nSetup complete! Your daily limit is: %.2f calories.\n" "$DAILY_LIMIT"
+    else
+        echo -e "\nFailed to save settings."
+    fi
+}
+
 CALORIE_TRACKER() {
     echo -e "\nEnter your username:"
     read USERNAME
+    
+    # Check if user exists
     USER_ID=$($PSQL "SELECT user_id FROM users WHERE username='$USERNAME'" | xargs)
     
     if [[ -z $USER_ID ]]; then
-        echo -e "\nUser not found. Would you like to create an account? (y/n)"
+        echo -e "\nUser not found. Create account? (y/n)"
         read CREATE_USER
         if [[ $CREATE_USER == "y" ]]; then
-            $PSQL "INSERT INTO users(username) VALUES ('$USERNAME')" > /dev/null
+            # Insert and then IMMEDIATELY fetch the new ID
+            $PSQL "INSERT INTO users(username) VALUES ('$USERNAME')"
             USER_ID=$($PSQL "SELECT user_id FROM users WHERE username='$USERNAME'" | xargs)
+            
+            if [[ -z $USER_ID ]]; then
+                echo "Error: Could not create user. Check your database connection."
+                MAIN_MENU; return
+            fi
+            
             echo "Account created for $USERNAME!"
-            echo -e "\nPlease go through the calorie tracking setup to set your daily limit."
-            CALORE_TRACKER_SETUP($USER_ID) {
-                echo -e "\nEnter your weight in lbs:"
-                read WEIGHT
-                echo -e "\nEnter your age in years:"
-                read AGE
-                echo -e "\nEnter your height in inches:"
-                read HEIGHT
-                echo -e "\nEnter your gender (M/F):"
-                read GENDER
-                echo -e "Enter your activity level (1-5, where 1 is sedentary and 5 is very active):"
-                read ACTIVITY_LEVEL
-            }
-
-        
+            CALORIE_TRACKER_SETUP "$USER_ID"
         else
             MAIN_MENU; return
         fi
+    else
+        echo -e "\nWelcome back, $USERNAME!"
     fi
-
     MAIN_MENU
 }
+
 
 # Execute the program
 MAIN_MENU
