@@ -171,6 +171,21 @@ CALORIE_TRACKER() {
             $PSQL "INSERT INTO users(username) VALUES ('$USERNAME')" > /dev/null
             USER_ID=$($PSQL "SELECT user_id FROM users WHERE username='$USERNAME'" | xargs)
             echo "Account created for $USERNAME!"
+            echo -e "\nPlease go through the calorie tracking setup to set your daily limit."
+            CALORE_TRACKER_SETUP($USER_ID) {
+                echo -e "\nEnter your weight in lbs:"
+                read WEIGHT
+                echo -e "\nEnter your age in years:"
+                read AGE
+                echo -e "\nEnter your height in inches:"
+                read HEIGHT
+                echo -e "\nEnter your gender (M/F):"
+                read GENDER
+                echo -e "Enter your activity level (1-5, where 1 is sedentary and 5 is very active):"
+                read ACTIVITY_LEVEL
+            }
+
+        
         else
             MAIN_MENU; return
         fi
