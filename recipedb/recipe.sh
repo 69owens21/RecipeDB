@@ -8,14 +8,16 @@ MAIN_MENU() {
   echo -e "1) Add a new recipe"
   echo -e "2) View all recipes"
   echo -e "3) Search for a recipe by name"
-  echo -e "4) Exit"
+  echo -e "4) Calorie Tracker (coming soon)"
+  echo -e "5) Exit"
   read MAIN_MENU_SELECTION
 
   case $MAIN_MENU_SELECTION in
     1) ADD_RECIPE ;;
     2) VIEW_RECIPES ;;
     3) SEARCH_RECIPE ;;
-    4) exit ;;
+    4) CALORIE_TRACKER ;;
+    5) exit ;;
     *) echo -e "\nInvalid option. Please try again." ; MAIN_MENU ;;
   esac
 }
@@ -155,6 +157,11 @@ VIEW_RECIPE_DETAILS() {
 
 
     SEARCH_RECIPE_MENU
+}
+
+CALORIE_TRACKER() {
+    echo -e "\nCalorie Tracker feature is coming soon! Stay tuned for updates."
+    MAIN_MENU
 }
 
 # Execute the program
