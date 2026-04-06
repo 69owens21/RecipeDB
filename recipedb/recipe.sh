@@ -95,10 +95,21 @@ VIEW_ALL_RECIPES() {
 
 #View recipes by category WIP
 VIEW_RECIPES_BY_CATEGORY() {
-    echo -e "\nEnter the category name to filter by:"
-    read CATEGORY_NAME
-    CATEGORY_ID=$($PSQL "SELECT cat_id from recipe_categories WHERE name ILIKE '$CATEGORY_NAME'" | xargs)
+  echo -e "\nEnter the category name:"
+  read CAT_NAME
+  
+  RECIPES=$($PSQL "SELECT r.title FROM recipes r 
+                   JOIN recipe_category_links rcl ON r.recipe_id = rcl.recipe_id 
+                   JOIN recipe_categories rc ON rcl.cat_id = rc.cat_id 
+                   WHERE rc.name ILIKE '$CAT_NAME'")
 
+  if [[ -z $(echo "$RECIPES" | xargs) ]]; then
+    echo -e "\nNo recipes found in '$CAT_NAME'."
+  else
+    echo -e "\nRecipes in $CAT_NAME:"
+    echo "$RECIPES"
+  fi
+  MAIN_MENU
 }
 
 SEARCH_RECIPE() {
@@ -253,14 +264,20 @@ CALORIE_TRACKER() {
 }
 
 CALORIES_LEFT() {
-    VAL=$($PSQL "SELECT cl.daily_calorie_limit - COALESCE(di.total_calories, 0) FROM users u JOIN calorie_limits cl ON u.user_id = cl.user_id LEFT JOIN daily_intake di ON u.user_id = di.user_id AND di.log_date = CURRENT_DATE WHERE u.user_id = $1" | xargs)
-    
-    # Check if result is empty or null
-    if [[ -z $VAL || $VAL == "NULL" ]]; then
-        echo -e "\nNo calorie limit set for this user."
-    else
-        echo -e "\nYou have $VAL calories left for today."
-    fi
+    USER_ID=$1
+  
+  # Calculate remaining calories
+  VAL=$($PSQL "SELECT cl.daily_calorie_limit - COALESCE(SUM(di.calories), 0) 
+               FROM calorie_limits cl 
+               LEFT JOIN daily_intake di ON cl.user_id = di.user_id AND di.log_date = CURRENT_DATE 
+               WHERE cl.user_id = $USER_ID 
+               GROUP BY cl.daily_calorie_limit" | xargs)
+
+  if [[ -z $VAL || $VAL == "NULL" ]]; then
+    echo -e "\nNo calorie limit set. Please run setup."
+  else
+    printf "\nYou have %.2f calories left for today.\n" "$VAL"
+  fi
 }
 
 # Daily calorie tracking and recipe calorie calculation features 
