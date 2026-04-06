@@ -8,7 +8,7 @@ MAIN_MENU() {
   echo -e "1) Add a new recipe"
   echo -e "2) View all recipes"
   echo -e "3) Search for a recipe by name"
-  echo -e "4) Calorie Tracker (WIP)"
+  echo -e "4) Calorie Tracker"
   echo -e "5) Exit"
   read MAIN_MENU_SELECTION
 
@@ -280,7 +280,6 @@ CALORIES_LEFT() {
   fi
 }
 
-# Daily calorie tracking and recipe calorie calculation features 
 
 # Execute the program
 MAIN_MENU
