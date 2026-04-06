@@ -95,6 +95,9 @@ VIEW_ALL_RECIPES() {
 
 #View recipes by category WIP
 VIEW_RECIPES_BY_CATEGORY() {
+    echo -e "\nEnter the category name to filter by:"
+    read CATEGORY_NAME
+    CATEGORY_ID=$($PSQL "SELECT cat_id from recipe_categories WHERE name ILIKE '$CATEGORY_NAME'" | xargs)
 
 }
 
@@ -242,14 +245,17 @@ CALORIE_TRACKER() {
         echo -e "\nWelcome back, $USERNAME!"
     fi
 
+    CALORIES_LEFT "$USER_ID"
 
-    CALORIES_LEFT() {
+
+    
+
+}
+
+CALORIES_LEFT() {
     CALORES_LEFT=$($PSQL "SELECT cl.daily_calorie_limit - COALESCE(di.total_calories, 0) AS calories_left FROM users u JOIN calorie_limits cl ON u.user_id = cl.user_id LEFT JOIN daily_intake di ON u.user_id = di.user_id AND di.log_date = CURRENT_DATE WHERE u.user_id = $1" | xargs)
     CALORIES_LEFT=${CALORIES_LEFT:-0} 
     echo -e "\nYou have $CALORIES_LEFT calories left for today."
-}
-    CALORES_LEFT 
-
 }
 
 # Daily calorie tracking and recipe calorie calculation features 
