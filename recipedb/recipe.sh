@@ -67,6 +67,22 @@ ADD_RECIPE() {
 }
 
 VIEW_RECIPES() {
+
+    echo -e "\n1)View all recipes"
+    echo -e "\n2)View recipes by category"
+    echo -e "\n3)Return to main menu"
+    read VIEW_RECIPES_MENU_SELECTION
+
+    case $VIEW_RECIPES_MENU_SELECTION in
+        1) VIEW_ALL_RECIPES ;;
+        2) VIEW_RECIPES_BY_CATEGORY ;;
+        3) MAIN_MENU ;;
+        *) echo -e "\nInvalid option." ; VIEW_RECIPES ;;
+    esac
+}
+
+VIEW_ALL_RECIPES() {
+
     SHOW_RECIPES=$($PSQL "SELECT title FROM recipes")
     if [[ -z $(echo "$SHOW_RECIPES" | xargs) ]]; then
         echo -e "\nThe database is currently empty."
@@ -75,6 +91,11 @@ VIEW_RECIPES() {
         echo "$SHOW_RECIPES"
     fi
     MAIN_MENU
+}
+
+#View recipes by category WIP
+VIEW_RECIPES_BY_CATEGORY() {
+
 }
 
 SEARCH_RECIPE() {
@@ -220,15 +241,18 @@ CALORIE_TRACKER() {
     else
         echo -e "\nWelcome back, $USERNAME!"
     fi
-    
-}
-CALORES_LEFT $USER_ID
 
-# Daily calorie tracking and recipe calorie calculation features 
-CALORIES_LEFT() {
+
+    CALORIES_LEFT() {
     CALORES_LEFT=$($PSQL "SELECT cl.daily_calorie_limit - COALESCE(di.total_calories, 0) AS calories_left FROM users u JOIN calorie_limits cl ON u.user_id = cl.user_id LEFT JOIN daily_intake di ON u.user_id = di.user_id AND di.log_date = CURRENT_DATE WHERE u.user_id = $1" | xargs)
     CALORIES_LEFT=${CALORIES_LEFT:-0} 
     echo -e "\nYou have $CALORIES_LEFT calories left for today."
 }
+    CALORES_LEFT 
+
+}
+
+# Daily calorie tracking and recipe calorie calculation features 
+
 # Execute the program
 MAIN_MENU

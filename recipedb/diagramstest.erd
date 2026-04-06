@@ -4,10 +4,10 @@
   "settings": {
     "width": 2000,
     "height": 2000,
-    "scrollTop": 0,
-    "scrollLeft": 0,
-    "zoomLevel": 1,
-    "show": 431,
+    "scrollTop": -310.3492,
+    "scrollLeft": -325.1751,
+    "zoomLevel": 0.8,
+    "show": 428,
     "database": 16,
     "databaseName": "recipes",
     "canvasType": "ERD",
@@ -76,15 +76,15 @@
           "BoG39ZRAjaflThUWxVWHa"
         ],
         "ui": {
-          "x": 1471,
-          "y": 282,
+          "x": 1438.5,
+          "y": 244.5,
           "zIndex": 2,
           "widthName": 77,
           "widthComment": 60,
           "color": ""
         },
         "meta": {
-          "updateAt": 1775443973369,
+          "updateAt": 1775445074238,
           "createAt": 1775443973369
         }
       },
@@ -916,7 +916,7 @@
           "columnIds": [
             "1ayjNiVN5DOqR0-lrvLyD"
           ],
-          "x": 415,
+          "x": 347,
           "y": 128,
           "direction": 2
         },
@@ -925,8 +925,8 @@
           "columnIds": [
             "aeS19Bo4RfmMskA_Zk_jx"
           ],
-          "x": 1471,
-          "y": 406,
+          "x": 1438.5,
+          "y": 368.5,
           "direction": 1
         },
         "meta": {
@@ -944,7 +944,7 @@
           "columnIds": [
             "1ayjNiVN5DOqR0-lrvLyD"
           ],
-          "x": 415,
+          "x": 347,
           "y": 76,
           "direction": 2
         },
@@ -981,7 +981,7 @@
           "columnIds": [
             "9jQjmfLj1HHy9qXZoi_lb"
           ],
-          "x": 431,
+          "x": 363,
           "y": 320,
           "direction": 2
         },
@@ -1009,7 +1009,7 @@
           "columnIds": [
             "lLz1P4nkedAf8MXznkInj"
           ],
-          "x": 431,
+          "x": 363,
           "y": 396,
           "direction": 2
         },
@@ -1037,7 +1037,7 @@
           "columnIds": [
             "oYInSly9Czu-jpkjLnd__"
           ],
-          "x": 893,
+          "x": 825,
           "y": 358,
           "direction": 2
         },
