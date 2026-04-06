@@ -8,7 +8,7 @@ MAIN_MENU() {
   echo -e "1) Add a new recipe"
   echo -e "2) View all recipes"
   echo -e "3) Search for a recipe by name"
-  echo -e "4) Calorie Tracker (coming soon)"
+  echo -e "4) Calorie Tracker (WIP)"
   echo -e "5) Exit"
   read MAIN_MENU_SELECTION
 
@@ -183,7 +183,6 @@ CALORIE_TRACKER_SETUP() {
 
     DAILY_LIMIT=$(echo "$BMR * $ACTIVITY_LEVEL" | bc -l)
 
-    # Insert into database (Note: fixed spelling to 'calorie_limits')
     INSERT_RESULT=$($PSQL "INSERT INTO calorie_limits(user_id, weight, height, age, gender, activity_level, daily_calorie_limit) VALUES ($LOCAL_USER_ID, $WEIGHT, $HEIGHT, $AGE, '$GENDER', '$ACTIVITY_LEVEL', $DAILY_LIMIT)")
 
     if [[ $INSERT_RESULT == "INSERT 0 1" ]]; then
@@ -224,6 +223,13 @@ CALORIE_TRACKER() {
     MAIN_MENU
 }
 
-
+# Daily calorie tracking and recipe calorie calculation features 
+CALORIES_LEFT() {
+    # This function would calculate calories left for the day based on the user's daily limit and logged intake
+    # It would query the calorie_limits and daily_intake tables to compute the remaining calories
+    CALORES_LEFT=$($PSQL "SELECT cl.daily_calorie_limit - COALESCE(di.total_calories, 0) AS calories_left FROM users u JOIN calorie_limits cl ON u.user_id = cl.user_id LEFT JOIN daily_intake di ON u.user_id = di.user_id AND di.log_date = CURRENT_DATE WHERE u.user_id = $1" | xargs)
+    CALORIES_LEFT=${CALORIES_LEFT:-0} 
+    echo -e "\nYou have $CALORIES_LEFT calories left for today."
+}
 # Execute the program
 MAIN_MENU
