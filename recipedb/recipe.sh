@@ -220,13 +220,12 @@ CALORIE_TRACKER() {
     else
         echo -e "\nWelcome back, $USERNAME!"
     fi
-    MAIN_MENU
+    
 }
+CALORES_LEFT $USER_ID
 
 # Daily calorie tracking and recipe calorie calculation features 
 CALORIES_LEFT() {
-    # This function would calculate calories left for the day based on the user's daily limit and logged intake
-    # It would query the calorie_limits and daily_intake tables to compute the remaining calories
     CALORES_LEFT=$($PSQL "SELECT cl.daily_calorie_limit - COALESCE(di.total_calories, 0) AS calories_left FROM users u JOIN calorie_limits cl ON u.user_id = cl.user_id LEFT JOIN daily_intake di ON u.user_id = di.user_id AND di.log_date = CURRENT_DATE WHERE u.user_id = $1" | xargs)
     CALORIES_LEFT=${CALORIES_LEFT:-0} 
     echo -e "\nYou have $CALORIES_LEFT calories left for today."
